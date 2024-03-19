@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { flatten } from 'lodash';
 import { Popup } from 'semantic-ui-react';
 import { useLocation } from 'react-router-dom';
+import config from '@plone/volto/registry';
 
 /**
  * import from @plone/volto-slate Leaf when ready there
@@ -44,9 +45,19 @@ export const TextWithGlossaryTooltips = ({ text }) => {
   if (!glossarytooltips) {
     return text;
   }
+
+  // do not show tooltips in edit / add mode, unless explicitly requested
+  const showInEdit = config.settings.glossarytooltips_show_in_edit || false;
+  // in edit mode we need to make sure `text` is actually a string, to avoid errors
+  if (showInEdit && typeof text !== 'string') return text;
+
   const isEditMode = location.pathname.slice(-5) === '/edit';
   const isAddMode = location.pathname.slice(-4) === '/add';
-  if (isEditMode || isAddMode || location.pathname === '/' || !__CLIENT__) {
+  if (
+    (!showInEdit && (isEditMode || isAddMode)) ||
+    location.pathname === '/' ||
+    !__CLIENT__
+  ) {
     return text;
   }
 
